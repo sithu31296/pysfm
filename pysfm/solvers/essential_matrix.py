@@ -1,132 +1,109 @@
 from pysfm import *
-from pysfm.utils.geometry import inv, to_homo
+
+def backproject_3d(uv, depth, K):
+    '''
+    Backprojects 2d points given by uv coordinates into 3D using their depth values and intrinsic K
+    :param uv: array [N,2]
+    :param depth: array [N]
+    :param K: array [3,3]
+    :return: xyz: array [N,3]
+    '''
+
+    uv1 = np.concatenate([uv, np.ones((uv.shape[0], 1))], axis=1)
+    xyz = depth.reshape(-1, 1) * (np.linalg.inv(K) @ uv1.T).T
+    return xyz
 
 
-
-def scale_and_translate_points(points):
-    """Scale and translate image points so that the centroid of points are at the origin
-        and average distance to the origin is equal to sqrt(2)
-    Args:
-        points: homogeneous matrix with shape (3, #points)
-    Returns:
-        matrix of same shape and its normalization matrix
+class EssentialSolver:
+    """Estimate relative pose (up to scale) given a set of 2D-2D correspondences
     """
-    x, y = points[0], points[1]
-    center = points.mean(axis=1)    # mean of each row
-    cx = x - center[0]
-    cy = y - center[1]
-    dist = np.sqrt(np.power(cx, 2) + np.power(cy, 2))
-    scale = np.sqrt(2) / dist.mean()
-    norm3d = np.array([
-        [scale, 0, -scale * center[0]],
-        [0, scale, -scale * center[1]],
-        [0, 0, 1]
-    ])
-    return np.dot(norm3d, points), norm3d
+    def __init__(self, reproj_threshold=0.5, ransac_iters=10000):
+        self.reproj_threshold = reproj_threshold
+        self.ransac_iters = ransac_iters
+        self.mask = None
 
+    def __call__(self, kpts1, kpts2, K1, K2):
+        R = np.full((3, 3), np.nan)
+        t = np.full((3, 1), np.nan)
+        inliers = 0
+        if len(kpts1) < 5:
+            return R, t, inliers
+        
+        # normalize keypoints
+        kpts1 = (kpts1 - K1[[0, 1], [2, 2]][None]) / K1[[0, 1], [0, 1]][None]
+        kpts2 = (kpts2 - K2[[0, 1], [2, 2]][None]) / K2[[0, 1], [0, 1]][None]
 
-def correspondence_matrix(p1, p2):
-    """
-    Each row in the A matrix below is constructed as
-    [x'*x, x'*y, x', 
-     y'*x, y'*y, y', 
-     x, y, 1]
-    """
-    p1x, p1y = p1[:2]
-    p2x, p2y = p2[:2]
-    return np.array([
-        p1x * p2x, p1x * p2y, p1x, 
-        p1y * p2x, p1y * p2y, p1y,
-        p2x, p2y, np.ones(len(p1x))
-    ]).T
+        # normalize ransac threshold
+        ransac_thr = self.reproj_threshold / np.mean([K1[0, 0], K2[1, 1], K1[1, 1], K2[0, 0]])
 
+        E, mask = cv2.findEssentialMat(kpts1, kpts2, 
+                                       np.eye(3), 
+                                       cv2.USAC_MAGSAC, 
+                                       0.9999, 
+                                       ransac_thr, 
+                                       self.ransac_iters)
+        self.mask = mask
+        if E is None:
+            return R, t, inliers
 
-# def calc_essential_matrix(K: np.ndarray, pt1: np.ndarray, pt2: np.ndarray):
-#     """Calculate E with 2D corresponded points using normalized 8-point algorithm
-#         Result will be up to a scale
-#     Args:
-#         K: (3, 3)
-#         pt1: (#points, 2)
-#         pt2: (#points, 2)
-#     Returns:
-#         Essential matrix (3, 3)
-#     """
-#     # normalize points
-#     pt1n, T1 = scale_and_translate_points(pt1)
-#     pt2n, T2 = scale_and_translate_points(pt2)
-
-#     # compute E with 8-point algorithm
-#     A = correspondence_matrix(pt1n, pt2n)
-
-#     # compute linear least square solution
-#     U, S, V = np.linalg.svd(A)
-#     F = V[-1].reshape(3, 3)
-
-#     # constrain F. Make rank 2 by zeroing out last singular value
-#     U, S, V = np.linalg.svd(F)
-#     S = [1, 1, 0]   # force rank 2 and equal eigenvalues
-#     F = np.dot(U, np.dot(np.diag(S), V))
+        best_n_inliers = 0
+        ret = R, t, 0
+        for _E in np.split(E, len(E) / 3):
+            n, R, t, _ = cv2.recoverPose(_E, kpts1, kpts2, np.eye(3), 1e9, mask=mask)
+            if n > best_n_inliers:
+                best_n_inliers = n
+                ret = (R, t[:, 0], n)
+        return ret
     
-#     # reverse preprocessing of coordinates
-#     # we know that P1' E P2 = 0
-#     F = np.dot(T1.T, np.dot(F, T2))
-#     return F / F[2, 2]
 
+class EssentialMetricSolver(EssentialSolver):
+    """Estimate relative pose (with scale) given a set of 2D-2D correspondences
 
-#     # E, mask = cv2.findEssentialMat(pt1, pt2, K, cv2.RANSAC, prob=0.999, threshold=1.0)
-#     # pass_count, R, T, mask, s = cv2.recoverPose(pt1, pt2, K, None, K, None, E=E, mask=mask)
-#     # print(pass_count)
-#     # print(s)
-#     # return R, T, mask
-
-
-def compute_E(K: np.ndarray, pt1: np.ndarray, pt2: np.ndarray):
-    """Calculate E with 2D corresponded points using normalized 8-point algorithm
-        Result will be up to a scale
-    Args:
-        K: (3, 3)
-        pt1: (#points, 2)
-        pt2: (#points, 2)
-    Returns:
-        Essential matrix (3, 3)
+    The scale of the translation vector is obtained using RANSAC over the possible scales recovered from 3D-3D correspondences.
     """
-    E, mask = cv2.findEssentialMat(pt1, pt2, K, cv2.RANSAC, prob=0.999, threshold=1.0)
-    return E, mask
+    def __init__(self, ransac_scale_threshold=0.1, reproj_threshold=0.5, ransac_iters=10000):
+        super().__init__(reproj_threshold, ransac_iters)
+        self.ransac_scale_threshold = ransac_scale_threshold
 
+    def __call__(self, kpts1, kpts2, K1, K2, depth1, depth2):
+        R, t, inliers = super().__call__(kpts1, kpts2, K1, K2)
+        if inliers == 0:
+            return R, t, inliers
+        
+        mask = self.mask.ravel() == 1
 
-def compute_P_from_E(E: np.ndarray, pt1: np.ndarray, pt2: np.ndarray, K: np.ndarray, mask: np.ndarray):
-    """Compute the second camera matrix (assuming P1 = [I 0]) from E
-    E = [t]R
-    Returns:
-        list of 4 possible camera matrices
-    """
-    pass_count, R, T, mask = cv2.recoverPose(E, pt1, pt2, K, mask=mask)
-    return R, T, mask
+        inlier_kpts1 = np.int32(kpts1[mask])
+        inlier_kpts2 = np.int32(kpts2[mask])
 
+        inlier_depth1 = depth1[inlier_kpts1[:, 1], inlier_kpts1[:, 0]]
+        inlier_depth2 = depth2[inlier_kpts2[:, 1], inlier_kpts2[:, 0]]
 
-# def compute_P_from_E(E):
-#     """Compute the second camera matrix (assuming P1 = [I 0]) from E
-#     E = [t]R
-#     Returns:
-#         list of 4 possible camera matrices
-#     """
-#     U, S, V = np.linalg.svd(E)
-#     # ensure rotation matrix are right-handed with positive determinant
-#     if np.linalg.det(np.dot(U, V)) < 0:
-#         V = -V
-    
-#     # create 4 possible camera matrices
-#     W = np.array([
-#         [0, -1, 0],
-#         [1, 0, 0],
-#         [0, 0, 1]
-#     ])
-#     P2s = [np.vstack((np.dot(U, np.dot(W, V)).T, U[:, 2])).T,
-#           np.vstack((np.dot(U, np.dot(W, V)).T, -U[:, 2])).T,
-#           np.vstack((np.dot(U, np.dot(W.T, V)).T, U[:, 2])).T,
-#           np.vstack((np.dot(U, np.dot(W.T, V)).T, -U[:, 2])).T]
-#     return P2s
+        # check for valid depth
+        valid = (inlier_depth1 > 0) * (inlier_depth2 > 0)
+        if valid.sum() < 1:
+            R = np.full((3, 3), np.nan)
+            t = np.full((3, 1), np.nan)
+            inliers = 0
+            return R, t, inliers
+        
+        points1 = backproject_3d(inlier_kpts1[valid], inlier_depth1[valid], K1)
+        points2 = backproject_3d(inlier_kpts2[valid], inlier_depth2[valid], K2)
 
-#     pass_count, R, T, mask, s = cv2.recoverPose(pt1, pt2, K, None, K, None, E=E, mask=mask)
-#     print(pass_count)
-#     print(s)
+        # rotate points1 to points2 coordinate system (so that axes are parallel)
+        # points1 = (R @ points1.T).T
+        points2 = (R.T @ points2.T).T
+
+        # get individual scales (for each 3D-3D correspondence)
+        scales = np.dot(points2 - points1, t.reshape(3, 1))
+
+        # RANSAC loop
+        best_inliers = 0
+        best_scale = None
+        for scale_hyp in scales:
+            inliers_hyp = (np.abs(scales - scale_hyp) < self.ransac_scale_threshold).sum().item()
+            if inliers_hyp > best_inliers:
+                best_inliers = inliers_hyp
+                best_scale = scale_hyp
+
+        t_metric = best_scale * t
+        return R, t_metric, best_inliers

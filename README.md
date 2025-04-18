@@ -5,8 +5,8 @@
 - [x] Focal Length Estimation (DepthPro, MoGe, GeoCalib)
 - [x] Monocular Depth Estimation (DepthPro, MoGe)
 - [x] Feature Detection and Matching (LoFTR, RoMa)
-- [ ] Relative Pose Estimation
-- [ ] Absolute Pose Estimation
+- [x] Relative Pose Estimation
+- [x] Absolute Pose Estimation
 - [ ] Triangulation
 - [ ] Bundle Adjustment
 - [ ] Solvers (Essential, Fundamental, PnP, RANSAC)
@@ -75,11 +75,11 @@ Supported Models:
 
 ### Local Descriptor or Image Matching
 
-Given two images, match the corresponding features and find the pose of second image relative to the first image.
+Given two images, to find the matches (pixel locations) based on features correspondences.
 
 Supported Feature Detectors/Matching Models:
-* [LoFTR]() ()
-* [RoMa]() (CVPR 2024)
+* [LoFTR](https://github.com/zju3dv/LoFTR) (CVPR 2021)
+* [RoMa](https://github.com/Parskatt/RoMa) (CVPR 2024)
 
 Run this command to match the two images:
 
@@ -93,15 +93,45 @@ Matched Keypoints             |  Matched 3D Effect
 
 > Notes: You can also specify the number of matches for dense methods.
 
-### Relative Pose Estimation
+### Pose Estimation (Relative/Absolute)
+
+Given 2D correspondences, to find the relative or absolute pose between two images.
+
+Relative Pose Estimation
+* Up to an unknown scale
+* 2D-2D Correspondences
+* Pose relative to an another image
+
+Absolute Pose Estimation or Camera Relocalization
+* Up to a real scale
+* 2D-3D Correspondences
+* Pose relative to a world/map
+
+> With relative pose from 2D-2D correspondences, you can only recover the direction of motion (translation vector is only correct up to scale), but not how far you moved. So the resulting pose is in an arbitary scale.
 
 Pose Solvers:
-* Essential Matrix (if)
-* Fundamental Matrix (if)
-* PnP ()
+* 2D-2D Correspondences
+  * Essential Matrix (if you know the camera intrinsics)
+  * Fundamental Matrix (if you don't know the camera intrinsics)
+  * Homography
+* 2D-3D Correspondences
+  * PnP (if you know the camera intrinsics and depth of the first image)
+* 3D-3D Corrspondences
+  * Procrustes (if you know the camera intrinsics and depth of both images)
 
+No matter which algorithm you choose, the initial correspondences will be pixel correspondences.
 
+Run this command to match the two images:
 
+```bash
+python scripts/find_pose.py
+```
+
+Relative Pose Estimation   |  Absolute Pose Estimation
+:-------------------------:|:-------------------------:
+![relative_pose](./assets/relative_pose.png)  |  ![absolute_pose](./assets/absolute_pose.png)
+
+> Here you can see that in relative pose estimation, the reconstructed point clouds are not aligned.
 
 <!-- 
 ## Testing Datasets
