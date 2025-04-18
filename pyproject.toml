@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pysfm"
+version = "0.1"
+description = "Python only Structure-from-Motion and 3D Computer Vision"
+readme = "README.md"
+license = {text = "MIT"}
+dependencies = [
+    "yacs",
+    "numpy<2",
+    "pillow_heif",
+    "matplotlib",
+]
+
+[project.scripts]
+pysfm = "scripts:main"
+
+[project.urls]
+Homepage = "https://github.com/sithu31296/pysfm"
+Repository = "https://github.com/sithu31296/pysfm"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pysfm"]
