@@ -1,4 +1,4 @@
-# Python Only 3D Computer Vision
+# Python Only Structure-from-Motion and 3D Computer Vision
 
 ## Progress
 
@@ -12,6 +12,31 @@
 - [ ] Solvers (Essential, Fundamental, PnP, RANSAC)
 - [ ] Structure-from-Motion
 - [ ] Visual Localization
+
+
+## Tasks
+
+Single-View
+* Monocular Depth Estimation (From Models)
+* Focal Length Estimation (From Metadata, Models)
+
+Two-View (Stereo)
+* Stereo Depth Estimation
+* Local Feature Matching 
+* Relative Pose Estimation
+* Absolute Pose Estimation
+* Triangulation
+* Visual Localization
+
+More Views 
+* Structure-from-Motion
+* Bundle Adjustment
+
+Structure Post-Processing
+* Real Metric-scale Injection
+
+Pose Optimization
+* Joint Optimization of Pose and NeRF/GS
 
 
 ## Installation
@@ -36,7 +61,7 @@ Supported Relative-Depth Models:
 Run this command to get the estimated depth and focal length (if not exist in metadata):
 
 ```bash
-python estimate_depth.py
+python scripts/estimate_depth.py
 ```
 ![mondepth_results](./assets/depth_with_cam.png)
 > Notes: For outdoor images, mask the sky.
@@ -48,13 +73,27 @@ The goal is to search for the most similar image from a database with respect to
 Supported Models:
 
 
-### Local Descriptor or Image Matching or Relative Pose Estimation
+### Local Descriptor or Image Matching
 
 Given two images, match the corresponding features and find the pose of second image relative to the first image.
 
 Supported Feature Detectors/Matching Models:
 * [LoFTR]() ()
 * [RoMa]() (CVPR 2024)
+
+Run this command to match the two images:
+
+```bash
+python scripts/match_views.py
+```
+
+Matched Keypoints             |  Matched 3D Effect
+:-------------------------:|:-------------------------:
+![matched_kpts](./assets/matched_kpts.png)  |  ![matched_3d](./assets/matched_3d.png)
+
+> Notes: You can also specify the number of matches for dense methods.
+
+### Relative Pose Estimation
 
 Pose Solvers:
 * Essential Matrix (if)

@@ -2,6 +2,7 @@ from pysfm import *
 import trimesh
 import open3d as o3d
 from scipy.spatial.transform import Rotation
+from pysfm.utils.imageio import tensor_to_image
 from pysfm.utils.geometry import compute_epipole
 from pysfm.utils.transforms import *
 
@@ -25,6 +26,27 @@ CAM_COLORS = [(255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 0, 255), (255, 204, 0
               (128, 255, 255), (255, 128, 255), (255, 255, 128), (0, 0, 0), (128, 128, 128)]
 
 
+def vis_image(img: Union[Image.Image, np.ndarray, Tensor]):
+    img = tensor_to_image(img)
+    plt.imshow(img)
+    plt.xticks([])
+    plt.yticks([])
+    plt.show()
+
+
+
+def vis_matches_3d_effect(im1, im2, warp, model_res, certainty):
+    H, W = model_res
+    x1 = (torch.tensor(np.array(im1)) / 255).permute(2, 0, 1)
+    x2 = (torch.tensor(np.array(im2)) / 255).permute(2, 0, 1)
+
+    im1_transfer_rgb = F.grid_sample(x1[None], torch.tensor(warp[:, W:, :2][None]), mode="bilinear", align_corners=False)[0]
+    im2_transfer_rgb = F.grid_sample(x2[None], torch.tensor(warp[:,:W, 2:][None]), mode="bilinear", align_corners=False)[0]
+    
+    warp_im = torch.cat((im2_transfer_rgb,im1_transfer_rgb),dim=2).numpy()
+    white_im = np.ones((H,2*W))
+    vis_im = certainty * warp_im + (1 - certainty) * white_im
+    vis_image(vis_im)
 
 
 def draw_matches(pts1, pts2, img0, img1):
@@ -61,6 +83,8 @@ def draw_matches(pts1, pts2, img0, img1):
         else:
             plt.scatter([p1[0], p2[0] + offset], [p1[1], p2[1]])
             plt.plot([p1[0], p2[0] + offset], [p1[1], p2[1]])
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
 
 

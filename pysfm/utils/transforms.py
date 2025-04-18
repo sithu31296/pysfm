@@ -1,5 +1,5 @@
 from pysfm import *
-
+from PIL import Image
 
 
 def todevice(batch, device, callback=None, non_blocking=False):

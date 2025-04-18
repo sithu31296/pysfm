@@ -49,6 +49,19 @@ def rgb2gray(img: Union[np.ndarray, torch.Tensor]):
     return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
 
+def tensor_to_image(x: Union[Tensor, Image.Image, np.ndarray]):
+    if isinstance(x, Tensor):
+        x = x.detach().cpu().numpy()
+    if isinstance(x, Image.Image):
+        return x
+    if x.max() <= 1.01:
+        x *= 255
+    if x.shape[0] == 3:
+        x = x.transpose((1, 2, 0))
+    x = x.astype(np.uint8)
+    return Image.fromarray(x)
+
+
 def read_image(path: Union[str, Path], auto_rotate: bool = True, remove_alpha: bool = True):
     """Read the image and also extract EXIF data if exists
     Args:
