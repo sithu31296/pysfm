@@ -1,0 +1,1 @@
+from .procrustes import rigid_points_registration_numpy

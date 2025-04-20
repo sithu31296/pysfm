@@ -1,42 +1,20 @@
 # Python Only Structure-from-Motion and 3D Computer Vision
 
-## Progress
+## Supported Features
 
-- [x] Focal Length Estimation (DepthPro, MoGe, GeoCalib)
-- [x] Monocular Depth Estimation (DepthPro, MoGe)
-- [x] Feature Detection and Matching (LoFTR, RoMa)
-- [x] Relative Pose Estimation
-- [x] Absolute Pose Estimation
+- [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, DepthPro, MoGe, GeoCalib)
+- [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
+- [ ] Global Image Retrieval (NetVLAD, SALAD)
+- [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) (LoFTR, RoMa)
+- [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
+- [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
+- [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
+- [x] [Point Cloud Registration](#point-cloud-registration) (Procrustes, ICP)
+- [ ] Stereo Depth Estimation
 - [ ] Triangulation
 - [ ] Bundle Adjustment
-- [ ] Solvers (Essential, Fundamental, PnP, RANSAC)
-- [ ] Structure-from-Motion
-- [ ] Visual Localization
-
-
-## Tasks
-
-Single-View
-* Monocular Depth Estimation (From Models)
-* Focal Length Estimation (From Metadata, Models)
-
-Two-View (Stereo)
-* Stereo Depth Estimation
-* Local Feature Matching 
-* Relative Pose Estimation
-* Absolute Pose Estimation
-* Triangulation
-* Visual Localization
-
-More Views 
-* Structure-from-Motion
-* Bundle Adjustment
-
-Structure Post-Processing
-* Real Metric-scale Injection
-
-Pose Optimization
-* Joint Optimization of Pose and NeRF/GS
+- [ ] Structure-from-Motion (COLMAP, GLOMAP)
+- [ ] Joint Optimization of Pose and NeRF/GS (iNeRF, iCoMa)
 
 
 ## Installation
@@ -45,9 +23,7 @@ Pose Optimization
 bash install.sh
 ```
 
-## Single-View
-
-### Monocular Depth Estimation
+## Monocular Depth Estimation
 
 The goal is to get the pixel-wise depth values (and bonus: focal length).
 
@@ -66,14 +42,14 @@ python scripts/estimate_depth.py
 ![mondepth_results](./assets/depth_with_cam.png)
 > Notes: For outdoor images, mask the sky.
 
-### Global Image Retrieval
+## Global Image Retrieval
 
 The goal is to search for the most similar image from a database with respect to the given image.
 
 Supported Models:
 
 
-### Local Descriptor or Image Matching
+## Local Feature Detection and Matching
 
 Given two images, to find the matches (pixel locations) based on features correspondences.
 
@@ -93,7 +69,7 @@ Matched Keypoints             |  Matched 3D Effect
 
 > Notes: You can also specify the number of matches for dense methods.
 
-### Pose Estimation (Relative/Absolute)
+## Pose Estimation (Relative/Absolute)
 
 Given 2D correspondences, to find the relative or absolute pose between two images.
 
@@ -132,6 +108,33 @@ Relative Pose Estimation   |  Absolute Pose Estimation
 ![relative_pose](./assets/relative_pose.png)  |  ![absolute_pose](./assets/absolute_pose.png)
 
 > Here you can see that in relative pose estimation, the reconstructed point clouds are not aligned.
+
+
+## Point Cloud Registration
+
+Given two point clouds, find the transformation and align them.
+
+Global Registration:
+* Procrustes or Kabsch
+
+Local Registration:
+* ICP
+
+Feature-based Registration:
+* [Deep Gloabl Registration](https://github.com/chrischoy/DeepGlobalRegistration) (CVPR 2020 Oral)
+
+Run this command to align the point clouds:
+
+```bash
+python scripts/align_pcd.py
+```
+
+Gloabl Registration   |  Local Registration
+:-------------------------:|:-------------------------:
+![before_regist](./assets/global_regist.png)  |  ![after_regist](./assets/global_regist.png)
+
+> Before registration/alignment, the two point clouds are in their own coordinate system.
+
 
 <!-- 
 ## Testing Datasets
