@@ -56,6 +56,10 @@ def fov_to_focal(fov: np.ndarray):
     return 0.5 / np.tan(fov / 2)
 
 
+def focal_mm_to_pixels(focal_mm, sensor_width, image_width):
+    return (focal_mm * image_width) / sensor_width
+
+
 def intrinsics_to_fov(intrinsics: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     fov_x = focal_to_fov(intrinsics[..., 0, 0])
     fov_y = focal_to_fov(intrinsics[..., 1, 1])

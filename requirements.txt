@@ -1,3 +1,6 @@
 yacs
 open3d
 trimesh
+omegaconf
+opencv-contrib-python
+transformations

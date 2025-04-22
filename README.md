@@ -10,12 +10,14 @@
 - [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
 - [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
 - [x] [Point Cloud Registration](#point-cloud-registration) (Procrustes, ICP)
-- [ ] Stereo Depth Estimation
+- [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
 - [ ] Triangulation
 - [ ] Bundle Adjustment
 - [ ] Structure-from-Motion (COLMAP, GLOMAP)
 - [ ] Joint Optimization of Pose and NeRF/GS (iNeRF, iCoMa)
 
+
+> WARNING: Some features or methods may be missing for now. They will be implemented slowly. The codebase may have significant changes.
 
 ## Installation
 
@@ -39,8 +41,28 @@ Run this command to get the estimated depth and focal length (if not exist in me
 ```bash
 python scripts/estimate_depth.py
 ```
-![mondepth_results](./assets/depth_with_cam.png)
+![monodepth_results](./assets/depth_with_cam.png)
 > Notes: For outdoor images, mask the sky.
+
+## Stereo Depth Estimation
+
+The goal is to get the pixel-wise depth values given stereo images.
+Usually the depth values are in metric-scale and accurate compared to monocular depth methods.
+
+Supported Models:
+* [FoundationStereo](https://github.com/NVlabs/FoundationStereo) (CVPR 2025 Oral)
+
+> Notes: For FoundationStereo, download the pre-trained model from official repo and put them in checkpoints/ folder.
+
+Run this command to get the estimated depth for the left image:
+
+```bash
+python scripts/estimate_stereo_depth.py
+```
+Ground-truth                |  Estimated
+:-------------------------:|:-------------------------:
+![gt_stereo](./assets/gt_stereo_depth.png)  |  ![est_stereo](./assets/est_stereo_depth.png)
+
 
 ## Global Image Retrieval
 
