@@ -3,14 +3,16 @@
 ## Supported Features
 
 - [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, DepthPro, MoGe, GeoCalib)
+- [ ] Camera Calibration
+- [ ] Multi-Camera Calibration
 - [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
+- [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
 - [ ] Global Image Retrieval (NetVLAD, SALAD)
 - [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) (LoFTR, RoMa)
 - [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
 - [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
 - [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
 - [x] [Point Cloud Registration](#point-cloud-registration) (Procrustes, ICP)
-- [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
 - [ ] Triangulation
 - [ ] Bundle Adjustment
 - [ ] Structure-from-Motion (COLMAP, GLOMAP)
