@@ -5,6 +5,7 @@
 - [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, DepthPro, MoGe, GeoCalib)
 - [ ] Camera Calibration
 - [ ] Multi-Camera Calibration
+- [ ] PTZ-Camera Calibration
 - [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
 - [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
 - [ ] Global Image Retrieval (NetVLAD, SALAD)
@@ -15,11 +16,28 @@
 - [x] [Point Cloud Registration](#point-cloud-registration) (Procrustes, ICP)
 - [ ] Triangulation
 - [ ] Bundle Adjustment
-- [ ] Structure-from-Motion (COLMAP, GLOMAP)
+- [ ] Differentiable Bundle Adjustment
+- [ ] Structure-from-Motion (Incremental, Global)
 - [ ] Joint Optimization of Pose and NeRF/GS (iNeRF, iCoMa)
-
+- [ ] Mesh Reconstruction (SDF, Marching Cubes, PSR)
+- [ ] Voxelization
+- [ ] 3D Representations (Point Cloud, Voxels, Mesh, NeRF, GS)
+- [ ] Geo-registration
+- [ ] MonoDepth Scale Ambiguity
+- [ ] Video Depth Alignment
+- [ ] Point Cloud Completion
 
 > WARNING: Some features or methods may be missing for now. They will be implemented slowly. The codebase may have significant changes.
+
+A lot of 3D computer vision tasks will be supported with a simple inference script with SOTA models.
+However, the following tasks will not be supported:
+* Object-Level 3D Tasks (Classification, Detection, Segmentation)
+* Scene Flow & Motion (Optical Flow) 
+* Learning-assisted SfM (DUSt3R, MASt3R, VGGSfM, etc.)
+* Visual SLAM (may be later)
+* Absolute Pose Regression
+* Scene Coordinate Regression
+
 
 ## Installation
 
