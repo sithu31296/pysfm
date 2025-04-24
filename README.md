@@ -1,4 +1,6 @@
-# Python Only Structure-from-Motion and 3D Computer Vision
+# Python Only 3D Computer Vision
+
+![teaser](./assets/teaser.png)
 
 ## Supported Features
 
