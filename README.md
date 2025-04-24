@@ -151,7 +151,7 @@ Relative Pose Estimation   |  Absolute Pose Estimation
 :-------------------------:|:-------------------------:
 ![relative_pose](./assets/relative_pose.png)  |  ![absolute_pose](./assets/absolute_pose.png)
 
-> Here you can see that in relative pose estimation, the reconstructed point clouds are not aligned.
+<!-- > Here you can see that in relative pose estimation, the reconstructed point clouds are not aligned. -->
 
 
 ## Point Cloud Registration
