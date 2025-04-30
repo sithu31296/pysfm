@@ -15,7 +15,8 @@
 - [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
 - [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
 - [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
-- [x] [Point Cloud Registration](#point-cloud-registration) (Procrustes, ICP)
+- [x] [Rigid Point Cloud Registration](#rigid-registration) (Procrustes, ICP)
+- [x] [Non-Rigid Point Cloud Registration](#non-rigid-or-deformable-registration) (CPD)
 - [ ] Triangulation
 - [ ] Bundle Adjustment
 - [ ] Differentiable Bundle Adjustment
@@ -35,7 +36,7 @@ A lot of 3D computer vision tasks will be supported with a simple inference scri
 However, the following tasks will not be supported:
 * Object-Level 3D Tasks (Classification, Detection, Segmentation)
 * Scene Flow & Motion (Optical Flow) 
-* Learning-assisted SfM (DUSt3R, MASt3R, VGGSfM, etc.)
+* Learning-based SfM (DUSt3R, MASt3R, VGGSfM, etc.) (may be later)
 * Visual SLAM (may be later)
 * Absolute Pose Regression
 * Scene Coordinate Regression
@@ -85,6 +86,7 @@ Ground-truth                |  Estimated
 :-------------------------:|:-------------------------:
 ![gt_stereo](./assets/gt_stereo_depth.png)  |  ![est_stereo](./assets/est_stereo_depth.png)
 
+Image from [MiddleBury 2005 Dataset](https://vision.middlebury.edu/stereo/data/scenes2005/).
 
 ## Global Image Retrieval
 
@@ -156,7 +158,9 @@ Relative Pose Estimation   |  Absolute Pose Estimation
 
 ## Point Cloud Registration
 
-Given two point clouds, find the transformation and align them.
+### Rigid Registration
+
+Given two point clouds, find the global transformation and align them.
 
 Global Registration:
 * Procrustes or Kabsch
@@ -179,6 +183,23 @@ Gloabl Registration   |  Local Registration
 
 > Before registration/alignment, the two point clouds are in their own coordinate system.
 
+### Non-Rigid or Deformable Registration
+
+Given two point clouds, find the transformation of each point and align them.
+
+Supported Methods:
+* [CPD](https://github.com/siavashk/pycpd/tree/master) (TPAMI 2010)
+
+
+Run this command to align the point clouds:
+
+```bash
+python scripts/align_pcd_non_rigid.py
+```
+
+Gloabl Registration   |  Non-Rigid Registration
+:-------------------------:|:-------------------------:
+![global_regist](./assets/global_regist.png)  |  ![deform_regist](./assets/deform_regist.png)
 
 <!-- 
 ## Testing Datasets
