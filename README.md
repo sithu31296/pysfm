@@ -4,31 +4,37 @@
 
 ## Supported Features
 
-- [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, DepthPro, MoGe, GeoCalib)
-- [ ] Camera Calibration
-- [ ] Multi-Camera Calibration
-- [ ] PTZ-Camera Calibration
-- [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
-- [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
-- [ ] Global Image Retrieval (NetVLAD, SALAD)
-- [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) (LoFTR, RoMa)
-- [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
-- [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
-- [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
-- [x] [Rigid Point Cloud Registration](#rigid-registration) (Procrustes, ICP)
-- [x] [Non-Rigid Point Cloud Registration](#non-rigid-or-deformable-registration) (CPD)
-- [ ] Triangulation
-- [ ] Bundle Adjustment
-- [ ] Differentiable Bundle Adjustment
-- [ ] Structure-from-Motion (Incremental, Global)
-- [ ] Joint Optimization of Pose and NeRF/GS (iNeRF, iCoMa)
-- [ ] Mesh Reconstruction (SDF, Marching Cubes, PSR)
-- [ ] Voxelization
-- [ ] 3D Representations (Point Cloud, Voxels, Mesh, NeRF, GS)
-- [ ] Geo-registration
-- [ ] MonoDepth Scale Ambiguity
-- [ ] Video Depth Alignment
-- [ ] Point Cloud Completion
+* Camera Model
+  - [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, DepthPro, MoGe, GeoCalib)
+* Camera Calibration
+  - [ ] Single-Camera Calibration
+  - [ ] Multi-Camera Calibration
+  - [ ] PTZ-Camera Calibration
+  - [ ] LiDAR-Camera Calibration
+* Depth Estimation
+  - [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
+  - [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
+* Pose Estimation
+  - [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
+  - [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
+  - [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
+  - [ ] Joint Optimization of Pose and NeRF/GS (iNeRF, iCoMa)
+* Point-set Registration
+  - [x] [Rigid Registration](#rigid-registration) (Procrustes, ICP)
+  - [x] [Non-Rigid Registration](#non-rigid-or-deformable-registration) (CPD)
+* 3D Reconstruction
+  - [ ] Global Image Retrieval (NetVLAD, SALAD)
+  - [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) (LoFTR, RoMa)
+  - [ ] Triangulation
+  - [ ] Structure-from-Motion (Incremental, Global)
+* Global Alignment
+  - [ ] Bundle Adjustment
+  - [ ] Differentiable Bundle Adjustment
+  - [ ] Video Depth Alignment
+* Post Processing
+  - [ ] Mesh Reconstruction (SDF, Marching Cubes, PSR)
+  - [ ] Voxelization
+  - [ ] Point Cloud Completion
 
 > WARNING: Some features or methods may be missing for now. They will be implemented slowly. The codebase may have significant changes.
 
