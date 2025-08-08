@@ -19,5 +19,21 @@ cd ..
 # MoGe
 pip install git+https://github.com/microsoft/MoGe.git
 
+# SupeRANSAC
+git clone https://github.com/danini/superansac.git
+sudo apt-get install libopencv-dev libopencv-contrib-dev libarpack++2-dev libarpack2-dev libsuperlu-dev cmake build-essential libboost-all-dev libeigen3-dev
+cd superansac/
+pip install .
+
+cd ../..
+
+# UFM
+git clone --recursive https://github.com/UniFlowMatch/UFM.git
+cd UFM
+cd UniCeption
+pip install -e .
+cd ..
+pip install -e .
+
 
 pip install -e .

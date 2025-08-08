@@ -4,3 +4,4 @@ trimesh
 omegaconf
 opencv-contrib-python
 transformations
+onnxruntime

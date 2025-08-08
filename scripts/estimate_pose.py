@@ -1,10 +1,8 @@
 from pysfm import *
-from pysfm.matchers import RoMa, LoFTR
-from pysfm.solvers import FundamentalSolver, EssentialSolver, EssentialMetricSolver
+from pysfm.matchers import RoMa
+from pysfm.solvers import *
 from pysfm.monodepth import MoGe
-from pysfm.segmenters.sky import SkyRemover
 from pysfm.utils.imageio import read_image
-from pysfm.utils.viz import draw_matches, vis_matches_3d_effect
 from pysfm.utils.geometry import backprojection
 from pysfm.utils.viz import visualize_pcd_with_cams_trimesh
 from pysfm.utils.metrics import compute_reprojection_error
@@ -13,7 +11,7 @@ np.set_printoptions(suppress=True)
 
 
 def main(im1_path, im2_path):
-    sample = 100
+    mode = "relative"
     num_kpts = 1000
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -22,9 +20,6 @@ def main(im1_path, im2_path):
 
     matcher = RoMa(device=device, num_kpts=num_kpts)
     depth_model = MoGe(device)
-    # solver = FundamentalSolver()
-    # solver = EssentialSolver()
-    solver = EssentialMetricSolver()
 
     results = matcher(im1_path, im2_path)
     kpts1, kpts2 = results['kpts1'], results['kpts2']
@@ -33,7 +28,7 @@ def main(im1_path, im2_path):
     depth1, est_focal1 = depth_model(im1_path)
     depth2, est_focal2 = depth_model(im2_path)
     pts3d1 = backprojection(depth1, est_focal1).reshape(-1, 3)
-    pts3d2 = backprojection(depth2, est_focal2).reshape(-1, 3)
+    pts3d2 = backprojection(depth2, est_focal2)
 
     K = np.array([
         [est_focal1, 0, W/2],
@@ -41,17 +36,24 @@ def main(im1_path, im2_path):
         [0, 0, 1]
     ], dtype=np.float32)
 
-    # F, inlier_mask = solver(kpts1, kpts2)
-    R, t, n_inliers = solver(kpts1, kpts2, K, K, depth1, depth2)
-    
-    pts3d2 = (R.T @ pts3d2.T) + (-R.T @ t[:, None])
-    pts3d2 = pts3d2.T
+    if mode == 'relative':
+        # solver = HomographySolver(method="opencv")
+        # solver = FundamentalSolver(method="poselib")
+        solver = EssentialSolver(method="poselib")
+        R, t, n_inliers, inliers_mask = solver(kpts2, kpts1, K, K)
 
+        scale_solver = RelativePoseScaleSolver(ransac_scale_threshold=0.05, use_ransac=True)
+        real_scale = scale_solver(kpts2, kpts1, depth2, depth1, K, K, R, t, inliers_mask)
+        t *= real_scale
+    else:
+        solver = PnPSolver(reproj_threshold=12.0, method="poselib")
+        points3d = pts3d2[kpts2[:, 1], kpts2[:, 0], :].astype(np.float32)
+        R, t, n_inliers, inliers_mask = solver(kpts1, points3d, K)
+    
     first_pose = np.eye(4)
     second_pose = np.eye(4)
     second_pose[:3, :3] = R
-    second_pose[:3, -1] = t
-    second_pose_in_first = np.linalg.inv(second_pose)
+    second_pose[:3, -1:] = t
 
     print(f"\tNum. of Matched Correspondences\t: {kpts1.shape[0]}")
     print(f"\tNum. of Inlier Correspondences\t: {n_inliers}")
@@ -59,11 +61,11 @@ def main(im1_path, im2_path):
     print(f"\tImage Resolution used in Model\t: {matcher.model_res}")
     print(f"\tFocal Length in Pixels\t\t: {est_focal1:.2f}")
 
-
+    pts3d2 = ((R @ pts3d2.reshape(-1, 3).T) + t).T
     visualize_pcd_with_cams_trimesh(
         [pts3d1, pts3d2], 
         [est_focal1, est_focal2],
-        [first_pose, second_pose_in_first],
+        [first_pose, second_pose],
         [im1, im2],
         masks=None,
         point_size=3,

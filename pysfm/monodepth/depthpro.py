@@ -1,12 +1,27 @@
 from pysfm import *
 import depth_pro
 from pysfm.utils.imageio import read_images
+from depth_pro.depth_pro import DepthProConfig
+
+root_dir = Path(__file__).parent.parent.parent.resolve()
+
+
+MONODEPTH_CONFIG_DICT = DepthProConfig(
+    patch_encoder_preset="dinov2l16_384",
+    image_encoder_preset="dinov2l16_384",
+    checkpoint_uri=str(root_dir / "checkpoints" / "depth_pro.pt"),
+    decoder_features=256,
+    use_fov_head=True,
+    fov_encoder_preset="dinov2l16_384",
+)
 
 
 class DepthPro(nn.Module):
     def __init__(self, device="cuda"):
         super().__init__()
-        self.model, self.transform = depth_pro.create_model_and_transforms(device=device)
+        self.model, self.transform = depth_pro.create_model_and_transforms(
+            MONODEPTH_CONFIG_DICT,
+            device=device)
         self.model.eval()
 
         self.max_depth = 200
@@ -36,3 +51,7 @@ class DepthPro(nn.Module):
                 return depths[0], est_focals[0]
         return depths, est_focals
     
+
+
+if __name__ == '__main__':
+    print(Path(__file__).parent.parent.resolve())

@@ -14,7 +14,7 @@
 * Depth Estimation
   - [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
   - [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
-* Pose Estimation
+* Camera Pose Estimation
   - [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
   - [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
   - [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
@@ -23,8 +23,9 @@
   - [x] [Rigid Registration](#rigid-registration) (Procrustes, ICP)
   - [x] [Non-Rigid Registration](#non-rigid-or-deformable-registration) (CPD)
 * 3D Reconstruction
-  - [ ] Global Image Retrieval (NetVLAD, SALAD)
-  - [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) (LoFTR, RoMa)
+  - [ ] Global Image Retrieval(#global-image-retrieval) (NetVLAD, [SALAD](https://github.com/serizba/salad))
+  - [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) ([RoMa](https://github.com/Parskatt/RoMa), [UFM](https://github.com/UniFlowMatch/UFM))
+  - [x] [Point Tracking or Correspondences]() ([])
   - [ ] Triangulation
   - [ ] Structure-from-Motion (Incremental, Global)
 * Global Alignment
@@ -35,7 +36,11 @@
   - [ ] Mesh Reconstruction (SDF, Marching Cubes, PSR)
   - [ ] Voxelization
   - [ ] Point Cloud Completion
-
+* Libraries
+  - [x] [OpenCV](https://github.com/opencv/opencv)
+  - [x] [PoseLib](https://github.com/PoseLib/PoseLib)
+  - [x] [PyCOLMAP](https://colmap.github.io/pycolmap/index.html)
+  - [x] [SupeRANSAC](https://github.com/danini/superansac)
 > WARNING: Some features or methods may be missing for now. They will be implemented slowly. The codebase may have significant changes.
 
 A lot of 3D computer vision tasks will be supported with a simple inference script with SOTA models.
@@ -99,6 +104,13 @@ Image from [MiddleBury 2005 Dataset](https://vision.middlebury.edu/stereo/data/s
 The goal is to search for the most similar image from a database with respect to the given image.
 
 Supported Models:
+* [SALAD](https://github.com/serizba/salad) (CVPR 2024)
+
+```bash
+python scripts/match_global.py
+```
+
+> Output: A JSON file with queries as keys and Top-3 matched candidates.
 
 
 ## Local Feature Detection and Matching
@@ -106,8 +118,9 @@ Supported Models:
 Given two images, to find the matches (pixel locations) based on features correspondences.
 
 Supported Feature Detectors/Matching Models:
-* [LoFTR](https://github.com/zju3dv/LoFTR) (CVPR 2021)
+<!-- * [LoFTR](https://github.com/zju3dv/LoFTR) (CVPR 2021) -->
 * [RoMa](https://github.com/Parskatt/RoMa) (CVPR 2024)
+* [UFM](https://github.com/UniFlowMatch/UFM) (ArXiv 2025)
 
 Run this command to match the two images:
 
@@ -129,11 +142,17 @@ Relative Pose Estimation
 * Up to an unknown scale
 * 2D-2D Correspondences
 * Pose relative to an another image
+* Algorithms
+  * 5 points
+  * 8 points
 
 Absolute Pose Estimation or Camera Relocalization
 * Up to a real scale
 * 2D-3D Correspondences
 * Pose relative to a world/map
+* Algorithms
+  * P3P (3 points)
+  * P4Pf (4 points)
 
 > With relative pose from 2D-2D correspondences, you can only recover the direction of motion (translation vector is only correct up to scale), but not how far you moved. So the resulting pose is in an arbitary scale.
 
@@ -152,7 +171,7 @@ No matter which algorithm you choose, the initial correspondences will be pixel 
 Run this command to match the two images:
 
 ```bash
-python scripts/find_pose.py
+python scripts/estimate_pose.py
 ```
 
 Relative Pose Estimation   |  Absolute Pose Estimation

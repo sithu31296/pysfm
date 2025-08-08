@@ -22,31 +22,70 @@ OPENGL = np.array([
 ])
 
 
-CAM_COLORS = [(255, 0, 0), (0, 0, 255), (0, 255, 0), (255, 0, 255), (255, 204, 0), (0, 204, 204),
+CAM_COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 0, 255), (255, 204, 0), (0, 204, 204),
               (128, 255, 255), (255, 128, 255), (255, 255, 128), (0, 0, 0), (128, 128, 128)]
 
 
-def vis_image(img: Union[Image.Image, np.ndarray, Tensor]):
+def vis_image(img: Union[Image.Image, np.ndarray, Tensor], save_path=None):
     img = tensor_to_image(img)
-    plt.imshow(img)
-    plt.xticks([])
-    plt.yticks([])
-    plt.show()
+    
+    if save_path is not None:
+        img.save(save_path)
+    else:
+        plt.imshow(img)
+        plt.xticks([])
+        plt.yticks([])
+        plt.show()
+        plt.close()
 
 
 
-def vis_matches_3d_effect(im1, im2, warp, model_res, certainty):
-    H, W = model_res
+def vis_matches_3d_effect(im1, im2, warp, certainty, save_path=None):
+    H, W, _ = im1.shape
+
     x1 = (torch.tensor(np.array(im1)) / 255).permute(2, 0, 1)
     x2 = (torch.tensor(np.array(im2)) / 255).permute(2, 0, 1)
 
-    im1_transfer_rgb = F.grid_sample(x1[None], torch.tensor(warp[:, W:, :2][None]), mode="bilinear", align_corners=False)[0]
-    im2_transfer_rgb = F.grid_sample(x2[None], torch.tensor(warp[:,:W, 2:][None]), mode="bilinear", align_corners=False)[0]
+    if warp.shape[1] > W:
+        warp1 = warp[:, W:, :2][None]
+        warp2 = warp[:, :W, 2:][None]
+    else:
+        warp1 = warp[..., :2][None]
+        warp2 = warp[..., 2:][None]
+
+    im1_transfer_rgb = F.grid_sample(x1[None], torch.tensor(warp1), mode="bilinear", align_corners=False)[0]
+    im2_transfer_rgb = F.grid_sample(x2[None], torch.tensor(warp2), mode="bilinear", align_corners=False)[0]
     
-    warp_im = torch.cat((im2_transfer_rgb,im1_transfer_rgb),dim=2).numpy()
-    white_im = np.ones((H,2*W))
-    vis_im = certainty * warp_im + (1 - certainty) * white_im
-    vis_image(vis_im)
+    warp_im = torch.cat((im2_transfer_rgb, im1_transfer_rgb),dim=2).numpy()
+    vis_im = certainty * warp_im + (1 - certainty) * np.ones_like(warp_im)
+    vis_image(vis_im, save_path)
+        
+
+# def vis_matches_3d_effect(im1, im2, warp, certainty, save_path=None):
+#     H, W, _ = im1.shape
+
+#     x1 = (torch.tensor(im1) / 255).permute(2, 0, 1)
+#     x2 = (torch.tensor(im2) / 255).permute(2, 0, 1)
+
+#     warp1 = warp[..., :2][None]
+#     warp2 = warp[..., 2:][None]
+
+#     im1_transfer_rgb = F.grid_sample(x1[None], torch.tensor(warp1), mode="bilinear", align_corners=False)[0]
+#     im2_transfer_rgb = F.grid_sample(x2[None], torch.tensor(warp2), mode="bilinear", align_corners=False)[0]
+
+#     im2_transfer_rgb2 = im2_transfer_rgb.numpy().transpose(1, 2, 0)
+#     vis_im2 = certainty[..., None] * im2_transfer_rgb2 + (1 - certainty[..., None]) * np.ones_like(im2_transfer_rgb2)
+#     vis_im2 = tensor_to_image(vis_im2)
+#     # plt.imshow(vis_im2)
+#     # plt.show()
+
+#     plt.imshow(certainty)
+#     plt.show()
+    
+#     # warp_im = torch.cat((im1_transfer_rgb, im2_transfer_rgb),dim=2).numpy()
+#     # vis_im = certainty * warp_im + (1 - certainty) * np.ones_like(warp_im)
+#     # vis_im = warp_im.transpose(1, 2, 0) * 255
+#     # vis_image(vis_im, save_path)
 
 
 def draw_matches(pts1, pts2, img0, img1):
@@ -148,8 +187,11 @@ def visualize_pcd_trimesh(pts, imgs=None, masks=None, point_size=3):
     scene.show(line_settings={"point_size": point_size})
 
 
-def visualize_pcd_with_cams_trimesh(pts, focals, c2ws, imgs=None, masks=None, point_size=3, cam_size=0.1):
-    pts, colors = process_pts_colors(pts, imgs, masks)
+def visualize_pcd_with_cams_trimesh(pts, focals, c2ws, imgs=None, masks=None, point_size=3, cam_size=0.1, show_image=True, only_first=False):
+    if only_first:
+        pts, colors = process_pts_colors(pts[0], imgs[0], masks)
+    else:
+        pts, colors = process_pts_colors(pts, imgs, masks)
     focals = to_numpy(focals)
     c2ws = to_numpy(c2ws)
 
@@ -160,10 +202,19 @@ def visualize_pcd_with_cams_trimesh(pts, focals, c2ws, imgs=None, masks=None, po
     # add each camera
     for i, pose_c2w in enumerate(c2ws):
         camera_edge_color = CAM_COLORS[i % len(CAM_COLORS)]
-        add_scene_cam_trimesh(scene, pose_c2w, camera_edge_color, imgs[i], focals[i], screen_width=cam_size)
+        add_scene_cam_trimesh(scene, pose_c2w, camera_edge_color, imgs[i] if show_image else None, focals[i], screen_width=cam_size)
 
     scene.show(line_settings={"point_size": point_size})
 
+def visualize_cams_trimesh(imgs, focals, c2ws, cam_size=0.1, point_size=3):
+    focals = to_numpy(focals)
+    c2ws = to_numpy(c2ws)
+    scene = trimesh.Scene()
+    # add each camera
+    for i, pose_c2w in enumerate(c2ws):
+        camera_edge_color = CAM_COLORS[i % len(CAM_COLORS)]
+        add_scene_cam_trimesh(scene, pose_c2w, camera_edge_color, imgs[i], focals[i], screen_width=cam_size)
+    scene.show(line_settings={"point_size": point_size})
 
 
 
@@ -182,7 +233,8 @@ def add_scene_cam_trimesh(scene, pose_c2w, edge_color, image=None, focal=None, i
         H = W = 1
 
     if isinstance(focal, np.ndarray):
-        focal = focal[0]
+        if focal.ndim > 0:
+            focal = focal[0]
     if not focal:
         focal = min(H,W) * 1.1 # default value
 

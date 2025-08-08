@@ -21,6 +21,8 @@ class MoGe(nn.Module):
         
         # if some images don't have metadata and want to use provided focals in depth estimation model
         if focals is not None:
+            if isinstance(focals, int):
+                focals = [focals] * len(images)
             for i in range(len(gt_focals)):
                 if gt_focals[i] is None:
                     gt_focals[i] = focals[i]

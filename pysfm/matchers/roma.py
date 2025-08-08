@@ -12,6 +12,8 @@ class RoMa:
             self.roma_model = roma_outdoor(device, coarse_res=560, upsample_res=864)
         else:
             self.roma_model = roma_indoor(device, coarse_res=560, upsample_res=864)
+        # self.roma_model.symmetric = False
+        H, W = self.roma_model.get_output_resolution()
     
     def transform_to_tensor(self, image):
         return torch.from_numpy(image / 255.).float()[None, None].to(self.device)
@@ -26,7 +28,6 @@ class RoMa:
         warp, certainty = self.roma_model.match(im1_path, im2_path, device=self.device)
         matches, good_certainty = self.roma_model.sample(warp, certainty, self.num_kpts)
         kpts1, kpts2 = self.roma_model.to_pixel_coordinates(matches, H1, W1, H2, W2)
-
         return {
             "kpts1": kpts1.detach().cpu().numpy().astype(int),
             "kpts2": kpts2.detach().cpu().numpy().astype(int),

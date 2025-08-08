@@ -4,7 +4,7 @@ import onnxruntime
 from pysfm.utils.utils import download_file_from_url
 from pysfm.utils.imageio import read_images
 
-
+root_dir = Path(__file__).parent.parent.parent.resolve()
 
 def run_skyseg(onnx_session, input_size, image):
     """
@@ -59,8 +59,7 @@ class SkyRemover:
         np.ndarray: Binary mask where 255 indicates non-sky regions
     """
     def __init__(self):
-        ckpt_dir = Path("./checkpoints")
-        sky_model_path = ckpt_dir / "skyseg.onnx"
+        sky_model_path = root_dir / "skyseg.onnx"
 
         if not sky_model_path.exists():
             download_file_from_url("https://huggingface.co/JianyuanWang/skyseg/resolve/main/skyseg.onnx", sky_model_path)

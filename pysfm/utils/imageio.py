@@ -49,7 +49,7 @@ def rgb2gray(img: Union[np.ndarray, torch.Tensor]):
     return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
 
-def tensor_to_image(x: Union[Tensor, Image.Image, np.ndarray]):
+def tensor_to_image(x: Union[Tensor, Image.Image, np.ndarray]) -> Image:
     if isinstance(x, Tensor):
         x = x.detach().cpu().numpy()
     if isinstance(x, Image.Image):
