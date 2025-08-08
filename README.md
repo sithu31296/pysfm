@@ -5,29 +5,31 @@
 ## Supported Features
 
 * Camera Model
-  - [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, DepthPro, MoGe, GeoCalib)
+  - [x] [Focal Length Estimation](#monocular-depth-estimation) (Metadata, MonoDepth)
 * Camera Calibration
   - [ ] Single-Camera Calibration
   - [ ] Multi-Camera Calibration
   - [ ] PTZ-Camera Calibration
   - [ ] LiDAR-Camera Calibration
 * Depth Estimation
-  - [x] [Monocular Depth Estimation](#monocular-depth-estimation) (DepthPro, MoGe)
-  - [x] [Stereo Depth Estimation](#stereo-depth-estimation) (FoundationStereo)
+  - [x] [Monocular Depth Estimation](#monocular-depth-estimation) ([DepthPro](https://github.com/apple/ml-depth-pro), [MoGe](https://github.com/microsoft/MoGe))
+  - [x] [Stereo Depth Estimation](#stereo-depth-estimation) ([FoundationStereo](https://github.com/NVlabs/FoundationStereo))
 * Camera Pose Estimation
   - [x] [Relative Pose Estimation](#pose-estimation-relativeabsolute) (Essential, Fundamental, Homography)
   - [x] [Absolute Pose Estimation](#pose-estimation-relativeabsolute) (PnP)
   - [x] [Visual Localization](#pose-estimation-relativeabsolute) (PnP)
-  - [ ] Joint Optimization of Pose and NeRF/GS (iNeRF, iCoMa)
+  - [ ] Pose Optimization from Scene Representation (iNeRF, iCoMa)
 * Point-set Registration
   - [x] [Rigid Registration](#rigid-registration) (Procrustes, ICP)
   - [x] [Non-Rigid Registration](#non-rigid-or-deformable-registration) (CPD)
 * 3D Reconstruction
-  - [ ] Global Image Retrieval(#global-image-retrieval) (NetVLAD, [SALAD](https://github.com/serizba/salad))
-  - [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) ([RoMa](https://github.com/Parskatt/RoMa), [UFM](https://github.com/UniFlowMatch/UFM))
-  - [x] [Point Tracking or Correspondences]() ([])
   - [ ] Triangulation
-  - [ ] Structure-from-Motion (Incremental, Global)
+  - [x] [Global Image Retrieval](#global-image-retrieval) ([NetVLAD](https://github.com/Relja/netvlad), [SALAD](https://github.com/serizba/salad))
+  - [x] [Local Feature Detection and Matching](#local-feature-detection-and-matching) ([RoMa](https://github.com/Parskatt/RoMa), [UFM](https://github.com/UniFlowMatch/UFM))
+  - [x] [Point Tracking and Flow Matching]() (Cotracker)
+  - [ ] Incremental Structure-from-Motion (COLMAP)
+  - [ ] Global Structure-from-Motion (GLOMAP)
+  - [ ] Feed-Forward Structure-from-Motion (VGGT)
 * Global Alignment
   - [ ] Bundle Adjustment
   - [ ] Differentiable Bundle Adjustment
@@ -42,7 +44,7 @@
   - [x] [PyCOLMAP](https://colmap.github.io/pycolmap/index.html)
   - [x] [SupeRANSAC](https://github.com/danini/superansac)
 > WARNING: Some features or methods may be missing for now. They will be implemented slowly. The codebase may have significant changes.
-
+<!-- 
 A lot of 3D computer vision tasks will be supported with a simple inference script with SOTA models.
 However, the following tasks will not be supported:
 * Object-Level 3D Tasks (Classification, Detection, Segmentation)
@@ -50,7 +52,7 @@ However, the following tasks will not be supported:
 * Learning-based SfM (DUSt3R, MASt3R, VGGSfM, etc.) (may be later)
 * Visual SLAM (may be later)
 * Absolute Pose Regression
-* Scene Coordinate Regression
+* Scene Coordinate Regression -->
 
 
 ## Installation
